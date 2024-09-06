@@ -1,15 +1,20 @@
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
 const TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config(); // Load environment variables
 
 // Replace with your own token
-const token = '7504947942:AAEohxif9Y54XlVBurwmPiTOw_Fv8XTZ1pQ';
+const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 const messageIds = {};
 const userState = {}; // Track user state
 
 // Global variables for QR code path, group link, and verification image
-const qrCodePath = 'https://i.ibb.co/Qcy9jq9/m-EHbw-ZVaj-E.png';
-const groupLink = 'https://t.me/hypnogurustreet'; // Ensure this link is valid
-const verificationImagePath = 'https://i.ibb.co/3vbfZYJ/hey-you-got-point-cheerful-260nw-2041172000.png';
+const qrCodePath = process.env.QR_CODE_PATH;
+const groupLink = process.env.GROUP_LINK;
+const verificationImagePath = process.env.VERIFICATION_IMAGE_PATH;
 
 // List of courses
 const courses = [
@@ -26,6 +31,7 @@ const courses = [
   // Add more courses as needed
 ];
 
+// Handle /start command
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
 
@@ -33,23 +39,19 @@ bot.onText(/\/start/, (msg) => {
   const courseList = courses
     .map(
       (course, index) =>
-        `${index + 1}. ${course.name}\nOFFICIAL PRICE: 10000/-  OUR PRICE: ${
-          course.price
-        }`
+        `${index + 1}. ${course.name}\nOFFICIAL PRICE: 10000/-  OUR PRICE: ${course.price}`
     )
     .join('\n\n');
 
-  bot
-    .sendMessage(
-      chatId,
-      `🎁🎀Welcome! Here are the available courses:🎈🎈\n\n${courseList}\n\nProofs: ${groupLink}\nFOR MORE COURSES CONTACT US: @COURSE_PROVIDER01\nTo get more details, please type the course number (e.g., 1, 2, 3).`
-    )
-    .then((sentMessage) => {
-      if (!messageIds[chatId]) {
-        messageIds[chatId] = [];
-      }
-      messageIds[chatId].push(sentMessage.message_id);
-    });
+  bot.sendMessage(
+    chatId,
+    `🎁🎀Welcome! Here are the available courses:🎈🎈\n\n${courseList}\n\nProofs: ${groupLink}\nFOR MORE COURSES CONTACT US: @COURSE_PROVIDER01\nTo get more details, please type the course number (e.g., 1, 2, 3).`
+  ).then((sentMessage) => {
+    if (!messageIds[chatId]) {
+      messageIds[chatId] = [];
+    }
+    messageIds[chatId].push(sentMessage.message_id);
+  });
 });
 
 // Clear all stored messages
@@ -67,6 +69,7 @@ bot.onText(/\/cls/, (msg) => {
   bot.sendMessage(chatId, 'Chat cleared!');
 });
 
+// Handle user messages
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text.trim();
@@ -124,6 +127,7 @@ bot.on('message', (msg) => {
   }
 });
 
+// Handle callback queries
 bot.on('callback_query', (callbackQuery) => {
   const chatId = callbackQuery.message.chat.id;
   const { data } = callbackQuery;
@@ -143,4 +147,72 @@ bot.on('callback_query', (callbackQuery) => {
       `Click here to join the group for proofs: ${groupLink}`
     );
   }
+});
+
+// Serve HTML status page
+app.get('/', (req, res) => {
+  // Simulate error status (change this to `true` to simulate an error)
+  const isError = false;
+
+  // Determine the status message and color based on error status
+  const statusMessage = isError ? 'Bot is stopped because of an error' : 'Bot is live now';
+  const backgroundColor = isError ? '#ffdddd' : '#ddffdd';
+
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Node.js App</title>
+        <style>
+          body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              background-color: #f0f0f0;
+          }
+
+          .container {
+              text-align: center;
+              padding: 20px;
+              border: 2px solid #333;
+              border-radius: 10px;
+              background-color: ${backgroundColor};
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          }
+
+          .animated {
+              font-size: 2em;
+              color: #333;
+              animation: fadeIn 2s ease-in-out;
+          }
+
+          @keyframes fadeIn {
+              from {
+                  opacity: 0;
+              }
+              to {
+                  opacity: 1;
+              }
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="animated">
+                ${statusMessage}
+            </div>
+        </div>
+    </body>
+    </html>
+  `);
+});
+
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
