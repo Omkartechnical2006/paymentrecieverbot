@@ -1,3 +1,7 @@
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config(); // Load environment variables
 
@@ -145,3 +149,70 @@ bot.on('callback_query', (callbackQuery) => {
   }
 });
 
+// Serve HTML status page
+app.get('/', (req, res) => {
+  // Simulate error status (change this to `true` to simulate an error)
+  const isError = false;
+
+  // Determine the status message and color based on error status
+  const statusMessage = isError ? 'Bot is stopped because of an error' : 'Bot is live now';
+  const backgroundColor = isError ? '#ffdddd' : '#ddffdd';
+
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Node.js App</title>
+        <style>
+          body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              background-color: #f0f0f0;
+          }
+
+          .container {
+              text-align: center;
+              padding: 20px;
+              border: 2px solid #333;
+              border-radius: 10px;
+              background-color: ${backgroundColor};
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          }
+
+          .animated {
+              font-size: 2em;
+              color: #333;
+              animation: fadeIn 2s ease-in-out;
+          }
+
+          @keyframes fadeIn {
+              from {
+                  opacity: 0;
+              }
+              to {
+                  opacity: 1;
+              }
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="animated">
+                ${statusMessage}
+            </div>
+        </div>
+    </body>
+    </html>
+  `);
+});
+
+app.listen(port, () => {
+  console.log(`server running on http://localhost:${port}`);
+});
