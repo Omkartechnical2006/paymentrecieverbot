@@ -145,9 +145,3 @@ bot.on('callback_query', (callbackQuery) => {
   }
 });
 
-// Serve HTML status page
-
-
-app.listen(port, () => {
-  console.log(`server running on http://localhost:${port}`);
-});
