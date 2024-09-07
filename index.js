@@ -19,6 +19,7 @@ const verificationImagePath = process.env.VERIFICATION_IMAGE_PATH;
 // List of courses
 const courses = [
   { name: '🎈🎁ABHAY MAGIC COURSE🎉🎨', price: '99' },
+  { name: '🎈🎁ARYA CHANDEL COURSE🎉🎨', price: '999' },
   { name: '🎈🎁ABHAY MAGIC PART 2🎉🎨', price: '399' },
   { name: '🎈🎁SWARNIM PATHAK(LEARN MAGIC)🎉🎨', price: '199' },
   { name: '🎈🎁STREET HYNOSIS BY HYPNOGURU🎉🎨', price: '399' },
